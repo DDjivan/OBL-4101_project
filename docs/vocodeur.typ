@@ -30,6 +30,20 @@ deactivate
   Source et instructions supplémentaires
 ]
 
+PySide6 est pas sur Python 3.14 mais 3.13.
+
+```bash
+ls /home/linuxbrew/.linuxbrew/bin/python*
+```
+
+```bash
+python3.13 -m venv .venv
+```
+
+```bash
+pip install pyside6
+```
+
 
 
 === Dépendances
