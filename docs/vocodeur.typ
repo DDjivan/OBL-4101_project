@@ -1,3 +1,29 @@
+#set text(lang: "fr")
+#show link: set text(fill: blue,)// weight: 700)
+#show link: underline
+
+// #show raw.where(block: false): highlight.with(
+//   fill:luma(245),
+//   radius: 4pt,
+//   extent: 1pt,
+//   top-edge: 1.1em,
+//   bottom-edge: -0.3em,
+// )
+
+// #show raw.where(block: true): block.with(
+//  fill: luma(240), // fill: luma(240),
+//  inset: 0pt, //10pt,
+//  radius: 4pt,
+//  outset: 4pt,
+// )
+
+#import "@preview/codly:1.3.0": *
+#import "@preview/codly-languages:0.1.1": *
+#show: codly-init.with()
+
+#codly(languages: codly-languages)
+#codly(number-format: none)
+
 = Notes pour le projet
 
 == Configuration
