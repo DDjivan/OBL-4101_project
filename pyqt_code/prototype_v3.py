@@ -34,7 +34,7 @@ from PySide6.QtCore import (
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import QUrl
 
-from graph_library import CustomGraphWindow
+from graph_library import CustomGraphWindow1
 from custom_signal import CustomSignalObj
 
 
@@ -509,7 +509,7 @@ class CustomMainWindow(QMainWindow):
         return
 
     def show_signal(self) -> None:
-        self.graph_window = CustomGraphWindow(self.current_object)
+        self.graph_window = CustomGraphWindow1(self.current_object)
         self.graph_window.show()
         return
 
