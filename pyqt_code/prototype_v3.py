@@ -34,7 +34,7 @@ from PySide6.QtCore import (
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import QUrl
 
-from graph_library import CustomGraphWindow
+from graph_library import CustomGraphWindow1, CustomGraphWindow2
 from custom_signal import CustomSignalObj
 
 
@@ -233,6 +233,10 @@ class CustomMainWindow(QMainWindow):
 
         self.switch_btn2 = QPushButton("&Commencer le calcul")
         self.switch_btn2.clicked.connect(self.start_the_calc)
+        self.switch_btn2.setEnabled(False)
+        self.fichier_combo.currentIndexChanged.connect(
+            lambda: self.switch_btn2.setEnabled(True)
+        )
 
 
 
@@ -253,15 +257,19 @@ class CustomMainWindow(QMainWindow):
 
         self.progress_bar = QProgressBar()
 
-        self.switch_btn3 = QPushButton("&Skip")
-        self.switch_btn3.clicked.connect(lambda:  self.tabs_container.setTabEnabled(3, True))
-
-
+        self.skip_btn = QPushButton("&Skip")
+        self.skip_btn.clicked.connect(
+            lambda: self.tabs_container.setTabEnabled(3, True)
+            )
+        self.switch_btn3 = QPushButton("&Voir les résultats")
+        self.switch_btn3.clicked.connect(lambda: self.switch_to_tab(3))
+        self.switch_btn3.setEnabled(False)
 
 
 
         third_layout.addWidget(self.progress_bar, 0, Qt.AlignVCenter)
-        third_layout.addWidget(self.switch_btn3, 0, Qt.AlignBottom)
+        third_layout.addWidget(self.skip_btn, 0, Qt.AlignBottom)
+        third_layout.addWidget(self.switch_btn3)#, 0, Qt.AlignBottom)
 
 
 
@@ -278,13 +286,20 @@ class CustomMainWindow(QMainWindow):
 
         self.signal_og = QLabel("Signal original")
         self.signal_og_l = QPushButton("Écouter l'original")
-        self.signal_og_l.clicked.connect(self.play_wav)
+        self.signal_og_l.clicked.connect(
+            lambda: self.play_wav(self.s_input.nom)
+            )
         self.signal_og_s = QPushButton("Voir l'original")
-        self.signal_og_s.clicked.connect(self.show_signal)
+        self.signal_og_s.clicked.connect(self.show_signal_input)
         self.signal_mo = QLabel("Signal modifié")
         self.signal_mo_l = QPushButton("Écouter le modifié")
+        self.signal_mo_l.clicked.connect(
+            lambda: self.play_wav(self.s_output.nom)
+            )
         self.signal_mo_s = QPushButton("Voir le modifié")
+        self.signal_mo_s.clicked.connect(self.show_signal_output)
         self.signal_s = QPushButton("Voir les deux")
+        self.signal_s.clicked.connect(self.show_signal_both)
 
 
         self.switch_btn4 = QPushButton("&Recommencer")
@@ -390,6 +405,7 @@ class CustomMainWindow(QMainWindow):
             self.drop_list.item(i).text() for i in range(n_files)
             ]
         self.fichier_combo.clear()
+        self.switch_btn2.setEnabled(False)
         self.fichier_combo.addItems(all_items)
 
         return
@@ -461,17 +477,22 @@ class CustomMainWindow(QMainWindow):
     def start_the_calc(self) -> None:
         self.switch_to_tab(2)
         self.tabs_container.setTabEnabled(2, True)
+        self.tabs_container.setTabEnabled(3, False)
+        self.switch_btn3.setEnabled(False)
 
         current_file = self.fichier_combo.currentText()
-        self.current_object = CustomSignalObj(current_file)
+        self.s_input = CustomSignalObj(current_file)
+
+        self.s_output = CustomSignalObj(current_file)
+        # TODO: modify self.s_output here
 
         self.start_loading()
         return
 
     def start_loading(self) -> None:
         self.valeur_max: int = 10
-        # self.intervalle: int = 1000
-        self.intervalle: int = 100
+        self.intervalle: int = 1000
+        # self.intervalle: int = 100
 
         self.progress_bar.setRange(0, self.valeur_max)
         self.progress_bar.setValue(0)
@@ -487,19 +508,19 @@ class CustomMainWindow(QMainWindow):
             self.current_value += 1
             self.progress_bar.setValue(self.current_value)
 
-            # self.intervalle = self.intervalle*3/4
-            self.intervalle = self.intervalle*3/2
+            self.intervalle = self.intervalle*3/4
+            # self.intervalle = self.intervalle*3/2
             self.chargement.start(self.intervalle)
         else:
             self.chargement.stop()
+            self.tabs_container.setTabEnabled(3, True)
+            self.switch_btn3.setEnabled(True)
         return
 
 
 
-    def play_wav(self) -> None:
-        path1: str = self.current_object.nom
-
-        self.wav_url = QUrl.fromLocalFile(Path(path1).absolute().as_posix())
+    def play_wav(self, chemin: str) -> None:
+        self.wav_url = QUrl.fromLocalFile(Path(chemin).absolute().as_posix())
 
         if not self.wav_url:
             return
@@ -508,8 +529,18 @@ class CustomMainWindow(QMainWindow):
         self.the_player.play()
         return
 
-    def show_signal(self) -> None:
-        self.graph_window = CustomGraphWindow(self.current_object)
+    def show_signal_input(self) -> None:
+        self.graph_window = CustomGraphWindow1(self.s_input)
+        self.graph_window.show()
+        return
+
+    def show_signal_output(self) -> None:
+        self.graph_window = CustomGraphWindow1(self.s_output)
+        self.graph_window.show()
+        return
+
+    def show_signal_both(self) -> None:
+        self.graph_window = CustomGraphWindow2(self.s_input, self.s_output)
         self.graph_window.show()
         return
 
