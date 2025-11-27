@@ -189,7 +189,6 @@ class CustomMainWindow(QMainWindow):
 
 
 
-
         selection_box = QHBoxLayout()
         fichier_indication = QLabel("Fichier d'entrée : ")
         self.fichier_combo = QComboBox(self)
@@ -198,31 +197,37 @@ class CustomMainWindow(QMainWindow):
         selection_box.addWidget(self.fichier_combo, 1) # 1 pour stretch
 
         pitch_box = QHBoxLayout()
-        pitch_text = QLabel("Hauteur : ")
-        self.pitch_slider = QSlider(self)
+        pitch: int = 0
+        pitch_text = QLabel(f"Hauteur : {pitch}")
+        self.pitch_slider = QSlider(self, pitch)
         self.pitch_slider.setOrientation(Qt.Horizontal)
         self.pitch_slider.setRange(-10, 10)
+        self.pitch_slider.valueChanged.connect(
+            lambda value: pitch_text.setText(f"Hauteur : {value}")
+            )
+        self.pitch_slider.setFixedWidth(400)
         pitch_btn = QPushButton("Réinitialiser")
-        pitch_btn.clicked.connect(lambda: self.pitch_slider.setValue(0))
+        pitch_btn.clicked.connect(lambda: self.pitch_slider.setValue(pitch))
         pitch_box.addWidget(pitch_text)
-        pitch_box.addWidget(self.pitch_slider, 1)
+        pitch_box.addWidget(self.pitch_slider)
         pitch_box.addWidget(pitch_btn)
 
         speed_box = QHBoxLayout()
-        speed_text = QLabel("Vitesse : ")
-        self.speed_slider = QSlider(self)
+        speed: int = 100
+        speed_text = QLabel(f"Vitesse : {speed} %")
+        self.speed_slider = QSlider(self, speed)
+        self.speed_slider.setValue(speed)
         self.speed_slider.setOrientation(Qt.Horizontal)
-        self.speed_slider.setRange(-10, 10)
+        self.speed_slider.setRange(0, 200)
+        self.speed_slider.valueChanged.connect(
+            lambda value: speed_text.setText(f"Vitesse : {value} %")
+            )
+        self.speed_slider.setFixedWidth(400)
         speed_btn = QPushButton("Réinitialiser")
-        speed_btn.clicked.connect(lambda: self.speed_slider.setValue(0))
-        speed_box.addWidget(speed_text)
-        speed_box.addWidget(self.speed_slider, 1)
-        speed_box.addWidget(speed_btn)
-
-
-
-
-
+        speed_btn.clicked.connect(lambda: self.speed_slider.setValue(speed))
+        speed_box.addWidget(speed_text, 0)
+        speed_box.addWidget(self.speed_slider, 0)
+        speed_box.addWidget(speed_btn, 0)
 
         self.switch_btn2 = QPushButton("&Commencer le calcul")
         self.switch_btn2.clicked.connect(self.start_the_calc)
