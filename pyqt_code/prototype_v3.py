@@ -102,6 +102,10 @@ class CustomMainWindow(QMainWindow):
 
         self.speed_algorithm = placeholder_algorithm
         self.pitch_algorithm = placeholder_algorithm
+        self.robot_algorithm = placeholder_algorithm
+        self.alien_algorithm = placeholder_algorithm
+
+
 
         ##--------------------------------------------------------------------##
         ###### Paramètres fenêtres
@@ -242,6 +246,18 @@ class CustomMainWindow(QMainWindow):
         speed_box.addWidget(self.speed_slider, 0)
         speed_box.addWidget(speed_btn, 0)
 
+        other_box = QHBoxLayout()
+        self.robot_btn = QPushButton("Effet Robot")
+        self.robot_btn.setCheckable(True)
+        self.alien_btn = QPushButton("Effet Alien")
+        self.alien_btn.setCheckable(True)
+        other_box.addWidget(self.robot_btn)
+        other_box.addWidget(self.alien_btn)
+
+
+
+
+
         self.switch_btn2 = QPushButton("&Commencer le calcul")
         self.switch_btn2.clicked.connect(self.start_the_calc)
         self.switch_btn2.setEnabled(False)
@@ -254,6 +270,7 @@ class CustomMainWindow(QMainWindow):
         second_layout.addLayout(selection_box)
         second_layout.addLayout(pitch_box)
         second_layout.addLayout(speed_box)
+        second_layout.addLayout(other_box)
         second_layout.addWidget(self.switch_btn2, 0, Qt.AlignBottom)
 
         # .addWidget(container, 0, Qt.AlignHCenter | Qt.AlignVCenter)
@@ -513,6 +530,22 @@ class CustomMainWindow(QMainWindow):
                 self.s_output.Fs,
                 self.pitch_slider.value()/100
             )
+
+        if self.robot_btn.isChecked():
+            self.s_output.y = self.robot_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                150,
+            )
+
+        if self.alien_btn.isChecked():
+            self.s_output.y = self.alien_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                80,
+            )
+
+
 
         self.s_output.export()
 

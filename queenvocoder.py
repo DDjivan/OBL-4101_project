@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 
 from pyqt_code.prototype_v3 import CustomMainWindow
 from code_python.vocodeur import tempo_sans_pitch, pitch_sans_tampo
+from code_python.vocodeur import robotize, alien
 
 
 
@@ -34,6 +35,8 @@ if __name__ == '__main__':
 
     our_window.speed_algorithm = tempo_sans_pitch
     our_window.pitch_algorithm = pitch_sans_tampo
+    our_window.robot_algorithm = robotize
+    our_window.alien_algorithm = alien
 
     # Run the main Qt loop
     sys.exit(app.exec())
