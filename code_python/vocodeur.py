@@ -47,7 +47,7 @@ def pitch_et_tampo(e, Fs, k):
 
 
 
-def tempo_sans_peach(e,Fs,k):
+def tempo_sans_pitch(e,Fs,k):
 
     #Entre
     Fen = 2048 #taille de la fenetre
@@ -55,7 +55,7 @@ def tempo_sans_peach(e,Fs,k):
 
 
 
-    _, _, e_stft = signal.stft(y, nperseg=Fen, noverlap=Fen - Pas_e) #calcule la TFCT à partir du signal d'entré (c'est l'equivalent de TFCT.m)
+    _, _, e_stft = signal.stft(e, nperseg=Fen, noverlap=Fen - Pas_e) #calcule la TFCT à partir du signal d'entré (c'est l'equivalent de TFCT.m)
 
     """
     Plus de detaille sur e_stft : c'est une matrice de array ou soit k et i quelquonque :
@@ -76,10 +76,10 @@ def tempo_sans_peach(e,Fs,k):
 
 def pitch_sans_tampo(e,Fs, k):
 
-    e = pitch_et_tampo(e,Fs,k) #version etirement
+    s = pitch_et_tampo(e,Fs,k) #version etirement
     #e = signal.resample(e, n_new) (version zero pading)
 
-    s = tempo_sans_peach(e,Fs, 1/k)# On applique l'inverse du facteur pour retrouver la durée d'origine.
+    s = tempo_sans_pitch(s,Fs, 1/k)# On applique l'inverse du facteur pour retrouver la durée d'origine.
 
 
     return s
@@ -103,16 +103,9 @@ if __name__ == '__main__':
     # 1. Convertir en float
     y = y.astype(float)
 
-    # --- Effet 1 : Robot (Utilise np.sin) ---
-    #y_robot = robotize(y, Fs, 150)
-
-    # --- Effet 2 : Chipmunk (Pitch aigu) ---
-    #y_robot = shift_pitch(y, Fs, 1.5)
-    # y_robot = effet_side(y,Fs,1.5)
-    y_robot = pitch_sans_tampo(y,Fs,1/1.5)
-
-    # --- Effet 3 : Ralenti (Tempo lent, voix normale) ---
-    #y_robot = stretch_tempo(y, Fs, factor=1.5)
+    #y_robot = pitch_et_tampo(y,Fs,1.5)
+    y_robot = pitch_sans_tampo(y,Fs,3)
+    #y_robot = tempo_sans_pitch(y,Fs,1.5)
 
     # 3. Sauvegarde
     output_filename = 'audio_robotise.wav'
