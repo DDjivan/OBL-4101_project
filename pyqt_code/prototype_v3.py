@@ -34,10 +34,16 @@ from PySide6.QtCore import (
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import QUrl
 
-from graph_library import CustomGraphWindow1, CustomGraphWindow2
-from custom_signal import CustomSignalObj
+from .graph_library import CustomGraphWindow1, CustomGraphWindow2
+from .custom_signal import CustomSignalObj
 
 
+
+##----------------------------------------------------------------------------##
+
+def placeholder_algorithm(e, Fs: int, k: float):
+    print("placeholder")
+    return e
 
 ##----------------------------------------------------------------------------##
 
@@ -90,13 +96,21 @@ class CustomMainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         placeholder_icon = QIcon("SVG Godot.svg")
+        app_icon = QIcon("app_icon.svg")
         close_icon = QIcon.fromTheme("window-close")
         help_icon = QIcon.fromTheme("help-contents")
 
+        self.speed_algorithm = placeholder_algorithm
+        self.pitch_algorithm = placeholder_algorithm
+        self.robot_algorithm = placeholder_algorithm
+        self.alien_algorithm = placeholder_algorithm
+
+
+
         ##--------------------------------------------------------------------##
         ###### Paramètres fenêtres
-        self.setWindowTitle("TITRE FENÊTRE")
-        self.setWindowIcon(placeholder_icon)
+        self.setWindowTitle("QueenVocoder par Djivan & Lilian")
+        self.setWindowIcon(app_icon)
 
 
         # Dimensions
@@ -199,15 +213,16 @@ class CustomMainWindow(QMainWindow):
         selection_box.addWidget(self.fichier_combo, 1) # 1 pour stretch
 
         pitch_box = QHBoxLayout()
-        pitch: int = 0
-        pitch_text = QLabel(f"Hauteur : {pitch}")
+        pitch: int = 100
         self.pitch_slider = QSlider(self, pitch)
+        self.pitch_slider.setRange(1, 200)
+        self.pitch_slider.setValue(pitch)
         self.pitch_slider.setOrientation(Qt.Horizontal)
-        self.pitch_slider.setRange(-10, 10)
         self.pitch_slider.valueChanged.connect(
-            lambda value: pitch_text.setText(f"Hauteur : {value}")
+            lambda value: pitch_text.setText(f"Hauteur : {value} %")
             )
         self.pitch_slider.setFixedWidth(400)
+        pitch_text = QLabel(f"Hauteur : {self.pitch_slider.value()} %")
         pitch_btn = QPushButton("Réinitialiser")
         pitch_btn.clicked.connect(lambda: self.pitch_slider.setValue(pitch))
         pitch_box.addWidget(pitch_text)
@@ -216,20 +231,32 @@ class CustomMainWindow(QMainWindow):
 
         speed_box = QHBoxLayout()
         speed: int = 100
-        speed_text = QLabel(f"Vitesse : {speed} %")
         self.speed_slider = QSlider(self, speed)
+        self.speed_slider.setRange(1, 200)
         self.speed_slider.setValue(speed)
         self.speed_slider.setOrientation(Qt.Horizontal)
-        self.speed_slider.setRange(0, 200)
         self.speed_slider.valueChanged.connect(
             lambda value: speed_text.setText(f"Vitesse : {value} %")
             )
         self.speed_slider.setFixedWidth(400)
+        speed_text = QLabel(f"Vitesse : {self.speed_slider.value()} %")
         speed_btn = QPushButton("Réinitialiser")
         speed_btn.clicked.connect(lambda: self.speed_slider.setValue(speed))
         speed_box.addWidget(speed_text, 0)
         speed_box.addWidget(self.speed_slider, 0)
         speed_box.addWidget(speed_btn, 0)
+
+        other_box = QHBoxLayout()
+        self.robot_btn = QPushButton("Effet Robot")
+        self.robot_btn.setCheckable(True)
+        self.alien_btn = QPushButton("Effet Alien")
+        self.alien_btn.setCheckable(True)
+        other_box.addWidget(self.robot_btn)
+        other_box.addWidget(self.alien_btn)
+
+
+
+
 
         self.switch_btn2 = QPushButton("&Commencer le calcul")
         self.switch_btn2.clicked.connect(self.start_the_calc)
@@ -243,6 +270,7 @@ class CustomMainWindow(QMainWindow):
         second_layout.addLayout(selection_box)
         second_layout.addLayout(pitch_box)
         second_layout.addLayout(speed_box)
+        second_layout.addLayout(other_box)
         second_layout.addWidget(self.switch_btn2, 0, Qt.AlignBottom)
 
         # .addWidget(container, 0, Qt.AlignHCenter | Qt.AlignVCenter)
@@ -486,13 +514,48 @@ class CustomMainWindow(QMainWindow):
         self.s_output = CustomSignalObj(current_file)
         # TODO: modify self.s_output here
 
+        # self.speed_algorithm = placeholder_algorithm
+        # self.pitch_algorithm = placeholder_algorithm
+
+        if self.speed_slider.value() != 100:
+            self.s_output.y = self.speed_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                self.speed_slider.value()/100
+            )
+
+        if self.pitch_slider.value() != 100:
+            self.s_output.y = self.pitch_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                self.pitch_slider.value()/100
+            )
+
+        if self.robot_btn.isChecked():
+            self.s_output.y = self.robot_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                150,
+            )
+
+        if self.alien_btn.isChecked():
+            self.s_output.y = self.alien_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                80,
+            )
+
+
+
+        self.s_output.export()
+
         self.start_loading()
         return
 
     def start_loading(self) -> None:
         self.valeur_max: int = 10
-        self.intervalle: int = 1000
-        # self.intervalle: int = 100
+        # self.intervalle: int = 1000
+        self.intervalle: int = 100
 
         self.progress_bar.setRange(0, self.valeur_max)
         self.progress_bar.setValue(0)
@@ -508,7 +571,8 @@ class CustomMainWindow(QMainWindow):
             self.current_value += 1
             self.progress_bar.setValue(self.current_value)
 
-            self.intervalle = self.intervalle*3/4
+            # self.intervalle = self.intervalle*3/4
+            self.intervalle = self.intervalle*4/5
             # self.intervalle = self.intervalle*3/2
             self.chargement.start(self.intervalle)
         else:

@@ -18,7 +18,7 @@ from PySide6.QtGui import QAction, QKeySequence, QShortcut, QIcon
 
 import pyqtgraph as pg
 
-from custom_signal import CustomSignalObj
+from .custom_signal import CustomSignalObj
 
 
 
@@ -72,14 +72,15 @@ class CustomGraphWindowAbstract(QMainWindow):
         return
 
 class CustomGraphWindow1(CustomGraphWindowAbstract):
-    def __init__(self, un_signal: CustomSignalObj):
+    def __init__(self, s0: CustomSignalObj):
         super().__init__()
 
         # wg = widget graph
         wg = self.graph_widget.addPlot(row=0, col=0, )#title="jsp")
 
-        wg.setTitle(f"Signal de `{un_signal.nom}`", color='#E49ECB')
-        wg.plot(un_signal.t, un_signal.y, pen=pg.mkPen('b', width=0.6))
+        wg.setTitle(f"Signal de `{s0.nom}`", color='#E49ECB')
+        min_l0 = min(len(s0.t), len(s0.y))
+        wg.plot(s0.t[:min_l0], s0.y[:min_l0], pen=pg.mkPen('b', width=0.6))
         wg.setLabel('bottom', 'Time', units='s')
         wg.getAxis('left').setPen('#E49ECB')
         wg.getAxis('bottom').setPen('#E49ECB')
@@ -96,8 +97,11 @@ class CustomGraphWindow2(CustomGraphWindowAbstract):
         wg = self.graph_widget.addPlot(row=0, col=0)
 
         wg.setTitle(f"`{s1.nom}` et `{s2.nom}`", color='#E49ECB')
-        wg.plot(s1.t, s1.y, pen=pg.mkPen('b', width=0.6))
-        wg.plot(s2.t, s2.y, pen=pg.mkPen('r', width=0.6))
+        min_l1 = min(len(s1.t), len(s1.y))
+        wg.plot(s1.t[:min_l1], s1.y[:min_l1], pen=pg.mkPen('c', width=0.6))
+        min_l2 = min(len(s2.t), len(s2.y))
+        wg.plot(s2.t[:min_l2], s2.y[:min_l2], pen=pg.mkPen('r', width=0.6))
+
         wg.setLabel('bottom', 'Time', units='s')
         wg.getAxis('left').setPen('#E49ECB')
         wg.getAxis('bottom').setPen('#E49ECB')
