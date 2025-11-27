@@ -233,6 +233,10 @@ class CustomMainWindow(QMainWindow):
 
         self.switch_btn2 = QPushButton("&Commencer le calcul")
         self.switch_btn2.clicked.connect(self.start_the_calc)
+        self.switch_btn2.setEnabled(False)
+        self.fichier_combo.currentIndexChanged.connect(
+            lambda: self.switch_btn2.setEnabled(True)
+        )
 
 
 
@@ -390,6 +394,7 @@ class CustomMainWindow(QMainWindow):
             self.drop_list.item(i).text() for i in range(n_files)
             ]
         self.fichier_combo.clear()
+        self.switch_btn2.setEnabled(False)
         self.fichier_combo.addItems(all_items)
 
         return
