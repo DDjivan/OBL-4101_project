@@ -199,15 +199,16 @@ class CustomMainWindow(QMainWindow):
         selection_box.addWidget(self.fichier_combo, 1) # 1 pour stretch
 
         pitch_box = QHBoxLayout()
-        pitch: int = 0
-        pitch_text = QLabel(f"Hauteur : {pitch}")
+        pitch: int = 100
         self.pitch_slider = QSlider(self, pitch)
+        self.pitch_slider.setRange(0, 200)
+        self.pitch_slider.setValue(pitch)
         self.pitch_slider.setOrientation(Qt.Horizontal)
-        self.pitch_slider.setRange(-10, 10)
         self.pitch_slider.valueChanged.connect(
-            lambda value: pitch_text.setText(f"Hauteur : {value}")
+            lambda value: pitch_text.setText(f"Hauteur : {value} %")
             )
         self.pitch_slider.setFixedWidth(400)
+        pitch_text = QLabel(f"Hauteur : {self.pitch_slider.value()} %")
         pitch_btn = QPushButton("Réinitialiser")
         pitch_btn.clicked.connect(lambda: self.pitch_slider.setValue(pitch))
         pitch_box.addWidget(pitch_text)
@@ -216,15 +217,15 @@ class CustomMainWindow(QMainWindow):
 
         speed_box = QHBoxLayout()
         speed: int = 100
-        speed_text = QLabel(f"Vitesse : {speed} %")
         self.speed_slider = QSlider(self, speed)
+        self.speed_slider.setRange(0, 200)
         self.speed_slider.setValue(speed)
         self.speed_slider.setOrientation(Qt.Horizontal)
-        self.speed_slider.setRange(0, 200)
         self.speed_slider.valueChanged.connect(
             lambda value: speed_text.setText(f"Vitesse : {value} %")
             )
         self.speed_slider.setFixedWidth(400)
+        speed_text = QLabel(f"Vitesse : {self.speed_slider.value()} %")
         speed_btn = QPushButton("Réinitialiser")
         speed_btn.clicked.connect(lambda: self.speed_slider.setValue(speed))
         speed_box.addWidget(speed_text, 0)
