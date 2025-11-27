@@ -34,10 +34,16 @@ from PySide6.QtCore import (
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import QUrl
 
-from graph_library import CustomGraphWindow1, CustomGraphWindow2
-from custom_signal import CustomSignalObj
+from .graph_library import CustomGraphWindow1, CustomGraphWindow2
+from .custom_signal import CustomSignalObj
 
 
+
+##----------------------------------------------------------------------------##
+
+def placeholder_algorithm(e, Fs: int, k: float):
+    print("placeholder")
+    return e
 
 ##----------------------------------------------------------------------------##
 
@@ -90,13 +96,17 @@ class CustomMainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         placeholder_icon = QIcon("SVG Godot.svg")
+        app_icon = QIcon("app_icon.svg")
         close_icon = QIcon.fromTheme("window-close")
         help_icon = QIcon.fromTheme("help-contents")
 
+        self.speed_algorithm = placeholder_algorithm
+        self.pitch_algorithm = placeholder_algorithm
+
         ##--------------------------------------------------------------------##
         ###### Paramètres fenêtres
-        self.setWindowTitle("TITRE FENÊTRE")
-        self.setWindowIcon(placeholder_icon)
+        self.setWindowTitle("QueenVocoder par Djivan & Lilian")
+        self.setWindowIcon(app_icon)
 
 
         # Dimensions
@@ -201,7 +211,7 @@ class CustomMainWindow(QMainWindow):
         pitch_box = QHBoxLayout()
         pitch: int = 100
         self.pitch_slider = QSlider(self, pitch)
-        self.pitch_slider.setRange(0, 200)
+        self.pitch_slider.setRange(1, 200)
         self.pitch_slider.setValue(pitch)
         self.pitch_slider.setOrientation(Qt.Horizontal)
         self.pitch_slider.valueChanged.connect(
@@ -218,7 +228,7 @@ class CustomMainWindow(QMainWindow):
         speed_box = QHBoxLayout()
         speed: int = 100
         self.speed_slider = QSlider(self, speed)
-        self.speed_slider.setRange(0, 200)
+        self.speed_slider.setRange(1, 200)
         self.speed_slider.setValue(speed)
         self.speed_slider.setOrientation(Qt.Horizontal)
         self.speed_slider.valueChanged.connect(
@@ -487,13 +497,32 @@ class CustomMainWindow(QMainWindow):
         self.s_output = CustomSignalObj(current_file)
         # TODO: modify self.s_output here
 
+        # self.speed_algorithm = placeholder_algorithm
+        # self.pitch_algorithm = placeholder_algorithm
+
+        if self.speed_slider.value() != 100:
+            self.s_output.y = self.speed_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                self.speed_slider.value()/100
+            )
+
+        if self.pitch_slider.value() != 100:
+            self.s_output.y = self.pitch_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                self.pitch_slider.value()/100
+            )
+
+        self.s_output.export()
+
         self.start_loading()
         return
 
     def start_loading(self) -> None:
         self.valeur_max: int = 10
-        self.intervalle: int = 1000
-        # self.intervalle: int = 100
+        # self.intervalle: int = 1000
+        self.intervalle: int = 100
 
         self.progress_bar.setRange(0, self.valeur_max)
         self.progress_bar.setValue(0)
@@ -509,7 +538,8 @@ class CustomMainWindow(QMainWindow):
             self.current_value += 1
             self.progress_bar.setValue(self.current_value)
 
-            self.intervalle = self.intervalle*3/4
+            # self.intervalle = self.intervalle*3/4
+            self.intervalle = self.intervalle*4/5
             # self.intervalle = self.intervalle*3/2
             self.chargement.start(self.intervalle)
         else:
