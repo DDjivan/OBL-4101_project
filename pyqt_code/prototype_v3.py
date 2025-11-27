@@ -257,15 +257,19 @@ class CustomMainWindow(QMainWindow):
 
         self.progress_bar = QProgressBar()
 
-        self.switch_btn3 = QPushButton("&Skip")
-        self.switch_btn3.clicked.connect(lambda:  self.tabs_container.setTabEnabled(3, True))
-
-
+        self.skip_btn = QPushButton("&Skip")
+        self.skip_btn.clicked.connect(
+            lambda: self.tabs_container.setTabEnabled(3, True)
+            )
+        self.switch_btn3 = QPushButton("&Voir les résultats")
+        self.switch_btn3.clicked.connect(lambda: self.switch_to_tab(3))
+        self.switch_btn3.setEnabled(False)
 
 
 
         third_layout.addWidget(self.progress_bar, 0, Qt.AlignVCenter)
-        third_layout.addWidget(self.switch_btn3, 0, Qt.AlignBottom)
+        third_layout.addWidget(self.skip_btn, 0, Qt.AlignBottom)
+        third_layout.addWidget(self.switch_btn3)#, 0, Qt.AlignBottom)
 
 
 
@@ -466,6 +470,8 @@ class CustomMainWindow(QMainWindow):
     def start_the_calc(self) -> None:
         self.switch_to_tab(2)
         self.tabs_container.setTabEnabled(2, True)
+        self.tabs_container.setTabEnabled(3, False)
+        self.switch_btn3.setEnabled(False)
 
         current_file = self.fichier_combo.currentText()
         self.current_object = CustomSignalObj(current_file)
@@ -497,6 +503,8 @@ class CustomMainWindow(QMainWindow):
             self.chargement.start(self.intervalle)
         else:
             self.chargement.stop()
+            self.tabs_container.setTabEnabled(3, True)
+            self.switch_btn3.setEnabled(True)
         return
 
 
