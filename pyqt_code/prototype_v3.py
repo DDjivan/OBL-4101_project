@@ -21,16 +21,15 @@ from PySide6.QtWidgets import (
     QProgressBar,
 
     QSlider,
-)
+    )
 
 from pathlib import Path
 
 from PySide6.QtCore import (
     Signal,
     Qt,
-    # QDir, Slot, QStandardPaths,
     QTimer,
-)
+    )
 
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import QUrl
