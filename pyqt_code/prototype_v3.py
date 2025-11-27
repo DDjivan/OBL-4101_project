@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (
     QStyle,
 
     QProgressBar,
+
+    QSlider,
 )
 
 from pathlib import Path
@@ -187,20 +189,49 @@ class CustomMainWindow(QMainWindow):
 
 
 
-        btn1 = QPushButton("PLACEHOLDER")
-        # btn1.clicked.connect(FONCTION)
 
-        self.box_fichier = QComboBox(self)
-        self.box_fichier.setPlaceholderText("SÉLECTIONNER UN FICHIER AUDIO")
+        selection_box = QHBoxLayout()
+        fichier_indication = QLabel("Fichier d'entrée : ")
+        self.fichier_combo = QComboBox(self)
+        self.fichier_combo.setPlaceholderText("SÉLECTIONNER UN FICHIER AUDIO")
+        selection_box.addWidget(fichier_indication)#, 0, Qt.AlignLeft)
+        selection_box.addWidget(self.fichier_combo, 1) # 1 pour stretch
+
+        pitch_box = QHBoxLayout()
+        pitch_text = QLabel("Hauteur : ")
+        self.pitch_slider = QSlider(self)
+        self.pitch_slider.setOrientation(Qt.Horizontal)
+        self.pitch_slider.setRange(-10, 10)
+        pitch_btn = QPushButton("Réinitialiser")
+        pitch_btn.clicked.connect(lambda: self.pitch_slider.setValue(0))
+        pitch_box.addWidget(pitch_text)
+        pitch_box.addWidget(self.pitch_slider, 1)
+        pitch_box.addWidget(pitch_btn)
+
+        speed_box = QHBoxLayout()
+        speed_text = QLabel("Vitesse : ")
+        self.speed_slider = QSlider(self)
+        self.speed_slider.setOrientation(Qt.Horizontal)
+        self.speed_slider.setRange(-10, 10)
+        speed_btn = QPushButton("Réinitialiser")
+        speed_btn.clicked.connect(lambda: self.speed_slider.setValue(0))
+        speed_box.addWidget(speed_text)
+        speed_box.addWidget(self.speed_slider, 1)
+        speed_box.addWidget(speed_btn)
+
+
+
+
+
 
         self.switch_btn2 = QPushButton("&Commencer le calcul")
-        # self.switch_btn2.clicked.connect(lambda: self.switch_to_tab(2))
         self.switch_btn2.clicked.connect(self.start_the_calc)
 
 
 
-        second_layout.addWidget(btn1)
-        second_layout.addWidget(self.box_fichier)
+        second_layout.addLayout(selection_box)
+        second_layout.addLayout(pitch_box)
+        second_layout.addLayout(speed_box)
         second_layout.addWidget(self.switch_btn2, 0, Qt.AlignBottom)
 
         # .addWidget(container, 0, Qt.AlignHCenter | Qt.AlignVCenter)
@@ -349,8 +380,8 @@ class CustomMainWindow(QMainWindow):
         all_items: list[str] = [
             self.drop_list.item(i).text() for i in range(n_files)
             ]
-        self.box_fichier.clear()
-        self.box_fichier.addItems(all_items)
+        self.fichier_combo.clear()
+        self.fichier_combo.addItems(all_items)
 
         return
 
