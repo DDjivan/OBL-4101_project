@@ -268,6 +268,7 @@ class CustomMainWindow(QMainWindow):
 
 
         fourth_layout.addLayout(bloc)
+        fourth_layout.addWidget(self.signal_s)
         fourth_layout.addWidget(self.switch_btn4, 0, Qt.AlignBottom)
 
 
