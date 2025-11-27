@@ -51,7 +51,7 @@ class CustomSignalObj():
         return
 
     def export(self) -> None:
-        print("exporting!")
+        # print("exporting!")
         # working_dir: str = getcwd()
 
         nom_uniquement, extension = splitext(basename(self.nom))
