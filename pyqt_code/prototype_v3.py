@@ -34,6 +34,9 @@ from PySide6.QtCore import (
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import QUrl
 
+from graph_library import CustomGraphWindow
+from custom_signal import CustomSignalObj
+
 
 
 ##----------------------------------------------------------------------------##
@@ -277,6 +280,7 @@ class CustomMainWindow(QMainWindow):
         self.signal_og_l = QPushButton("Écouter l'original")
         self.signal_og_l.clicked.connect(self.play_wav)
         self.signal_og_s = QPushButton("Voir l'original")
+        self.signal_og_s.clicked.connect(self.show_signal)
         self.signal_mo = QLabel("Signal modifié")
         self.signal_mo_l = QPushButton("Écouter le modifié")
         self.signal_mo_s = QPushButton("Voir le modifié")
@@ -458,6 +462,13 @@ class CustomMainWindow(QMainWindow):
         self.switch_to_tab(2)
         self.tabs_container.setTabEnabled(2, True)
 
+        current_file = self.fichier_combo.currentText()
+        self.current_object = CustomSignalObj(current_file)
+
+        self.start_loading()
+        return
+
+    def start_loading(self) -> None:
         self.valeur_max: int = 10
         # self.intervalle: int = 1000
         self.intervalle: int = 100
@@ -470,7 +481,6 @@ class CustomMainWindow(QMainWindow):
         self.chargement = QTimer()
         self.chargement.timeout.connect(self.update_progress)
         self.chargement.start(self.intervalle) # update toutes les x ms
-        return
 
     def update_progress(self) -> None:
         if self.current_value <= self.valeur_max:
@@ -487,8 +497,7 @@ class CustomMainWindow(QMainWindow):
 
 
     def play_wav(self) -> None:
-        # TODO: play chosen file
-        path1: str = "../code_matlab_fichiers_audio/" + 'Extrait.wav'
+        path1: str = self.current_object.nom
 
         self.wav_url = QUrl.fromLocalFile(Path(path1).absolute().as_posix())
 
@@ -497,6 +506,11 @@ class CustomMainWindow(QMainWindow):
 
         self.the_player.setSource(self.wav_url)
         self.the_player.play()
+        return
+
+    def show_signal(self) -> None:
+        self.graph_window = CustomGraphWindow(self.current_object)
+        self.graph_window.show()
         return
 
 
