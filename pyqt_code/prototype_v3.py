@@ -141,7 +141,7 @@ class CustomMainWindow(QMainWindow):
 
 
         ##--------------------------------------------------------------------##
-        ###### Onglet 1
+        ###### Onglet 0
 
         ### Élément 1
         self.drop_list = DropListCustomWidget()
@@ -181,7 +181,7 @@ class CustomMainWindow(QMainWindow):
 
 
 
-        ###### Onglet 2
+        ###### Onglet 1
         second_tab = QWidget()
 
         second_layout = QVBoxLayout()
@@ -243,7 +243,7 @@ class CustomMainWindow(QMainWindow):
 
 
 
-        ###### Onglet 3
+        ###### Onglet 2
         third_tab = QWidget()
         third_layout = QVBoxLayout()
         third_tab.setLayout(third_layout)
@@ -263,7 +263,7 @@ class CustomMainWindow(QMainWindow):
 
 
 
-        ###### Onglet 4
+        ###### Onglet 3
         self.the_player = QMediaPlayer(self)
         self.audio_output = QAudioOutput()
         self.the_player.setAudioOutput(self.audio_output)
@@ -339,6 +339,7 @@ class CustomMainWindow(QMainWindow):
         self.tabs_container.setTabEnabled(2, False)
         self.tabs_container.setTabEnabled(3, False)
         self.tabs_container.setTabEnabled(4, False)
+        self.tabs_container.setTabVisible(4, False)
 
         self.setCentralWidget(self.tabs_container)
 
