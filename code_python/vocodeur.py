@@ -11,57 +11,7 @@ import matplotlib.pyplot as plt
 
 
 
-def tracer_frequence_isolee(s_stft, k_idx, Fs, Fen, Pas_s):
-    
-    """
-    Isole une ligne k de la STFT, reconstruit le signal temporel (ISTFT)
-    et trace le résultat (l'oscillation temporelle).
-    
-    :param s_stft: La matrice STFT complète (complexe)
-    :param k_idx: L'indice de la fréquence à isoler (0 à N_fft/2)
-    :param Fs: Fréquence d'échantillonnage
-    :param Fen: Taille de la fenêtre (nperseg)
-    :param Pas_s: Le pas de synthèse utilisé (hop_length_out)
-    """
-    
-    # --- 1. ISOLATION (Votre logique) ---
-    # Créer une matrice de zéros de la même taille
-    stft_filtree = np.zeros_like(s_stft)
-    
-    # Copier uniquement la ligne demandée
-    stft_filtree[k_idx, :] = s_stft[k_idx, :]
-    
-    # --- 2. RECONSTRUCTION (ISTFT) ---
-    # On reconstruit le signal temporel qui ne contient QUE cette fréquence
-    # Note: istft retourne (temps, signal), on récupère les deux
-    t_out, s_isole = signal.istft(stft_filtree, fs=Fs, nperseg=Fen, noverlap=Fen - Pas_s)
-    
-    # --- 3. CALCUL DE LA FRÉQUENCE EN HZ (Pour info) ---
-    # La STFT a (n_fft // 2) + 1 lignes.
-    n_fft = (s_stft.shape[0] - 1) * 2
-    freq_hz = k_idx * Fs / n_fft
-    
-    # --- 4. TRACÉ ---
-    plt.figure(figsize=(12, 5))
-    
-    # On trace le signal
-    plt.plot(t_out, s_isole, label=f"Fréquence k={k_idx} (~{freq_hz:.1f} Hz)")
-    
-    plt.title(f"Signal Temporel Reconstruit - Fréquence isolée {freq_hz:.1f} Hz")
-    plt.xlabel("Temps [s]")
-    plt.ylabel("Amplitude")
-    plt.grid(True, alpha=0.3)
-    plt.legend(loc="upper right")
-    
-    # ZOOM AUTOMATIQUE
-    # Comme c'est une haute fréquence, si on affiche 3 secondes, on verra juste un bloc de couleur.
-    # On zoome sur les 50 premières millisecondes pour voir la belle sinusoïde.
-    #if t_out[-1] > 0.05:
-     #   plt.xlim(0, 0.05)
-      #  print("🔍 Zoom automatique sur les 0.05 premières secondes pour visualiser l'onde.")
-        
-    plt.tight_layout()
-    plt.show()
+
 
 
 
@@ -72,7 +22,7 @@ def tracer_frequence_isolee(s_stft, k_idx, Fs, Fen, Pas_s):
 ##----------------------------------------------------------------------------##
 ###### Effets
 
-def robotize(e, Fs, f_p):
+def robot(e, Fs, f_p):
     #Pour robotiser une voix on a besoin de faire de la modulation de signal (source https://emastered.com/fr/blog/what-is-a-vocoder)
 
     #modulation de signal c'est le produit du singal entrant par une sinusoide appelé la porteuse (source cours de mrs loiseau 🫠)
@@ -87,7 +37,7 @@ def robotize(e, Fs, f_p):
 
 
 
-def pitch_et_tampo(e, Fs, k):
+def hauteur_et_vitesse(e, Fs, k):
 
     f_e = np.fft.fftshift(np.fft.fftfreq(len(e), 1/Fs)) # crer l'abcisse pour la fft(grille des frequence et la met dans le bon ordre )
 
@@ -106,7 +56,7 @@ def pitch_et_tampo(e, Fs, k):
 
 
 
-def tempo_sans_pitch(e,Fs,k):
+def vitesse_naive(e,Fs,k):
 
     #Entre
     Fen = 2048 #taille de la fenetre
@@ -137,7 +87,7 @@ def tempo_sans_pitch(e,Fs,k):
 
 
 
-def tempo_sans_pitch2(e, Fs, k):
+def vitesse(e, Fs, k):
     #Entre
     Fen = 2048 #taille de la fenetre
     Pas_e = 512 #pas de la fenetre
@@ -203,7 +153,7 @@ def tempo_sans_pitch2(e, Fs, k):
 
 
 
-def pitch_sans_tampo(e,Fs, k):
+def hauteur(e,Fs, k):
 
     s = pitch_et_tampo(e,Fs,k) #version etirement
     #e = signal.resample(e, n_new) (version zero pading)
@@ -278,10 +228,10 @@ if __name__ == '__main__':
         y = y[:, 0]
 
 
-    y_robot = tempo_sans_pitch2(y,Fs,2)
+    #y_robot = tempo_sans_pitch2(y,Fs,2)
 
-    # y_robot = tempo_sans_pitch(y,Fs,0.5)
-    # y_robot = tempo_sans_pitch2(y,Fs,1.5)
+    y_robot = tempo_sans_pitch(y,Fs,1.5)
+    #y_robot = tempo_sans_pitch2(y,Fs,1.5)
 
     # 3. Sauvegarde
     output_filename = 'audio_robotise.wav'
@@ -340,54 +290,56 @@ def shift_pitch2(e, Fs, k):
 
 
 
-def phase_vocoder_bizzare(y, speed_factor):
-
-    # Etape 1 : calcule de la Transformée de Fourier à court terme (TFCT)
-    n_fft = 2048 #taille de la fenetre
-    hop_length_in = 512 #pas de la fenetre
-
-    hop_length_out = int(hop_length_in / speed_factor) #pas de la fenetre de sortie | si o < i alors quan on recolera les fenetre de maniere plus courte et donc le signal final sera plus court et inversement pour i>o
-
-    f, t, e_stft = signal.stft(y, nperseg=n_fft, noverlap=n_fft-hop_length_in) #calcule la TFCT à partir du signal d'entré (c'est l'equivalent de TFCT.m)
-
-
-    """
-    detaille sur e_stft : c'est une matrice de array ou soit k et i quelquonque
-        -e_stft[:, i] Donne une colone de la matrice qui represente une fenetre de la TFCT (precisement la iéme) de durée n_fft
-        -e_stft[k,:] Donne une ligne de la matrice qui represente pour frequence l'evolution de sa valeur complexe associé par la TFT au cours du temps
-        -e_stft[k,i] Donne le nombre complexe associé à une frequence k de la iéme fft
-    """
-
-
-
-    #Etape 2 : modification du signal (manipulation de la phase)
-    #à rajouter et corriger si on veut ameliorer le code mais ca ne sert à rien pour l'instant
-
-    phase = np.angle(e_stft) # Matrice au meme format que e_stft mais avec des reel represnetant la phase à la place des nombre complexe
-
-
-    phase_diff = np.diff(phase, axis=1)
-
-
-    phase_diff = np.concatenate((phase[:, 0].reshape(-1, 1), phase_diff), axis=1)
-
-    # On "déplie" la phase pour éviter les sauts de 2*pi
-    # (Note: une implémentation pro complète serait plus complexe ici,
-    # mais celle-ci fonctionne pour des facteurs raisonnables)
-
-    # Reconstruction de la nouvelle phase
-    # On accumule la phase avec le nouveau rythme
-    phase_acc = np.cumsum(phase_diff, axis=1)
-
-    # On recrée le signal complexe avec la A originale mais la nouvelle phase
-    e_stft_new = np.abs(e_stft) * np.exp(1j * phase_acc)
-
-
-    # 3. Synthèse (ISTFT) : On recolle les morceaux avec le nouveau saut
-    _, y_stretched = signal.istft(e_stft_new, nperseg=n_fft, noverlap=n_fft-hop_length_out)
-
-    return y_stretched
-
-
 
 #genere utulise pour debuger 
+def tracer_frequence_isolee(s_stft, k_idx, Fs, Fen, Pas_s):
+    
+    """
+    Isole une ligne k de la STFT, reconstruit le signal temporel (ISTFT)
+    et trace le résultat (l'oscillation temporelle).
+    
+    :param s_stft: La matrice STFT complète (complexe)
+    :param k_idx: L'indice de la fréquence à isoler (0 à N_fft/2)
+    :param Fs: Fréquence d'échantillonnage
+    :param Fen: Taille de la fenêtre (nperseg)
+    :param Pas_s: Le pas de synthèse utilisé (hop_length_out)
+    """
+    
+    # --- 1. ISOLATION (Votre logique) ---
+    # Créer une matrice de zéros de la même taille
+    stft_filtree = np.zeros_like(s_stft)
+    
+    # Copier uniquement la ligne demandée
+    stft_filtree[k_idx, :] = s_stft[k_idx, :]
+    
+    # --- 2. RECONSTRUCTION (ISTFT) ---
+    # On reconstruit le signal temporel qui ne contient QUE cette fréquence
+    # Note: istft retourne (temps, signal), on récupère les deux
+    t_out, s_isole = signal.istft(stft_filtree, fs=Fs, nperseg=Fen, noverlap=Fen - Pas_s)
+    
+    # --- 3. CALCUL DE LA FRÉQUENCE EN HZ (Pour info) ---
+    # La STFT a (n_fft // 2) + 1 lignes.
+    n_fft = (s_stft.shape[0] - 1) * 2
+    freq_hz = k_idx * Fs / n_fft
+    
+    # --- 4. TRACÉ ---
+    plt.figure(figsize=(12, 5))
+    
+    # On trace le signal
+    plt.plot(t_out, s_isole, label=f"Fréquence k={k_idx} (~{freq_hz:.1f} Hz)")
+    
+    plt.title(f"Signal Temporel Reconstruit - Fréquence isolée {freq_hz:.1f} Hz")
+    plt.xlabel("Temps [s]")
+    plt.ylabel("Amplitude")
+    plt.grid(True, alpha=0.3)
+    plt.legend(loc="upper right")
+    
+    # ZOOM AUTOMATIQUE
+    # Comme c'est une haute fréquence, si on affiche 3 secondes, on verra juste un bloc de couleur.
+    # On zoome sur les 50 premières millisecondes pour voir la belle sinusoïde.
+    #if t_out[-1] > 0.05:
+     #   plt.xlim(0, 0.05)
+      #  print("🔍 Zoom automatique sur les 0.05 premières secondes pour visualiser l'onde.")
+        
+    plt.tight_layout()
+    plt.show()
