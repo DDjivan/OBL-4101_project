@@ -36,13 +36,19 @@ from PySide6.QtCore import QUrl
 
 from .graph_library import CustomGraphWindow1, CustomGraphWindow2
 from .custom_signal import CustomSignalObj
+from .mplgraph_library import show_custom_matplotlib_window
+
+
+
+global DEBUG
+DEBUG: bool = False
 
 
 
 ##----------------------------------------------------------------------------##
 
 def placeholder_algorithm(e, Fs: int, k: float):
-    print("placeholder")
+    if DEBUG: print("placeholder")
     return e
 
 ##----------------------------------------------------------------------------##
@@ -104,6 +110,7 @@ class CustomMainWindow(QMainWindow):
         self.pitch_algorithm = placeholder_algorithm
         self.robot_algorithm = placeholder_algorithm
         self.alien_algorithm = placeholder_algorithm
+        self.moyen_algorithm = placeholder_algorithm
 
 
 
@@ -116,7 +123,7 @@ class CustomMainWindow(QMainWindow):
         # Dimensions
         # geometry = self.screen().availableGeometry()
         # print(f"{geometry = }")
-        self.resize(600, 400)
+        self.resize(800, 400)
 
 
 
@@ -246,13 +253,70 @@ class CustomMainWindow(QMainWindow):
         speed_box.addWidget(self.speed_slider, 0)
         speed_box.addWidget(speed_btn, 0)
 
-        other_box = QHBoxLayout()
-        self.robot_btn = QPushButton("Effet Robot")
-        self.robot_btn.setCheckable(True)
-        self.alien_btn = QPushButton("Effet Alien")
-        self.alien_btn.setCheckable(True)
-        other_box.addWidget(self.robot_btn)
-        other_box.addWidget(self.alien_btn)
+        # other_box = QHBoxLayout()
+        # self.robot_btn = QPushButton("Effet Robot")
+        # self.robot_btn.setCheckable(True)
+        # self.alien_btn = QPushButton("Effet Alien")
+        # self.alien_btn.setCheckable(True)
+        # other_box.addWidget(self.robot_btn)
+        # other_box.addWidget(self.alien_btn)
+
+        robot_box = QHBoxLayout()
+        self.robot: int  = 0
+        v_robot_min: int = 0
+        v_robot_max: int = 20_000
+        self.robot_slider = QSlider(self, self.robot)
+        self.robot_slider.setRange(v_robot_min, v_robot_max)
+        self.robot_slider.setValue(self.robot)
+        self.robot_slider.setOrientation(Qt.Horizontal)
+        self.robot_slider.valueChanged.connect(
+            lambda value: robot_text.setText(f"Effet Robot : {value} Hz")
+            )
+        self.robot_slider.setFixedWidth(400)
+        robot_text = QLabel(f"Effet Robot : {self.robot_slider.value()} Hz")
+        robot_btn = QPushButton("Réinitialiser")
+        robot_btn.clicked.connect(lambda:self.robot_slider.setValue(self.robot))
+        robot_box.addWidget(robot_text, 0)
+        robot_box.addWidget(self.robot_slider, 0)
+        robot_box.addWidget(robot_btn, 0)
+
+        alien_box = QHBoxLayout()
+        self.alien: int  = 1
+        v_alien_min: int = 1
+        v_alien_max: int = 10
+        self.alien_slider = QSlider(self, self.alien)
+        self.alien_slider.setRange(v_alien_min, v_alien_max)
+        self.alien_slider.setValue(self.alien)
+        self.alien_slider.setOrientation(Qt.Horizontal)
+        self.alien_slider.valueChanged.connect(
+            lambda value: alien_text.setText(f"Effet Alien : {value} n")
+            )
+        self.alien_slider.setFixedWidth(400)
+        alien_text = QLabel(f"Effet Alien : {self.alien_slider.value()} n")
+        alien_btn = QPushButton("Réinitialiser")
+        alien_btn.clicked.connect(lambda:self.alien_slider.setValue(self.alien))
+        alien_box.addWidget(alien_text, 0)
+        alien_box.addWidget(self.alien_slider, 0)
+        alien_box.addWidget(alien_btn, 0)
+
+        moyen_box = QHBoxLayout()
+        self.moyen: int  = 1
+        v_moyen_min: int = 1
+        v_moyen_max: int = 200
+        self.moyen_slider = QSlider(self, self.moyen)
+        self.moyen_slider.setRange(v_moyen_min, v_moyen_max)
+        self.moyen_slider.setValue(self.moyen)
+        self.moyen_slider.setOrientation(Qt.Horizontal)
+        self.moyen_slider.valueChanged.connect(
+            lambda value: moyen_text.setText(f"Effet Moyenne : {value} n")
+            )
+        self.moyen_slider.setFixedWidth(400)
+        moyen_text = QLabel(f"Effet Moyenne : {self.moyen_slider.value()} n")
+        moyen_btn = QPushButton("Réinitialiser")
+        moyen_btn.clicked.connect(lambda:self.moyen_slider.setValue(self.moyen))
+        moyen_box.addWidget(moyen_text, 0)
+        moyen_box.addWidget(self.moyen_slider, 0)
+        moyen_box.addWidget(moyen_btn, 0)
 
 
 
@@ -270,7 +334,10 @@ class CustomMainWindow(QMainWindow):
         second_layout.addLayout(selection_box)
         second_layout.addLayout(pitch_box)
         second_layout.addLayout(speed_box)
-        second_layout.addLayout(other_box)
+        # second_layout.addLayout(other_box)
+        second_layout.addLayout(robot_box)
+        second_layout.addLayout(alien_box)
+        second_layout.addLayout(moyen_box)
         second_layout.addWidget(self.switch_btn2, 0, Qt.AlignBottom)
 
         # .addWidget(container, 0, Qt.AlignHCenter | Qt.AlignVCenter)
@@ -318,14 +385,26 @@ class CustomMainWindow(QMainWindow):
             lambda: self.play_wav(self.s_input.nom)
             )
         self.signal_og_s = QPushButton("Voir l'original")
-        self.signal_og_s.clicked.connect(self.show_signal_input)
+        self.signal_og_s.clicked.connect(
+            self.show_signal_input
+            )
+        self.signal_og_mpl = QPushButton("Mieux voir l'original")
+        self.signal_og_mpl.clicked.connect(
+            lambda: show_custom_matplotlib_window(self.s_input)
+        )
         self.signal_mo = QLabel("Signal modifié")
         self.signal_mo_l = QPushButton("Écouter le modifié")
         self.signal_mo_l.clicked.connect(
             lambda: self.play_wav(self.s_output.nom)
             )
         self.signal_mo_s = QPushButton("Voir le modifié")
-        self.signal_mo_s.clicked.connect(self.show_signal_output)
+        self.signal_mo_s.clicked.connect(
+            self.show_signal_output
+            )
+        self.signal_mo_mpl = QPushButton("Mieux voir le modifié")
+        self.signal_mo_mpl.clicked.connect(
+            lambda: show_custom_matplotlib_window(self.s_output)
+        )
         self.signal_s = QPushButton("Voir les deux")
         self.signal_s.clicked.connect(self.show_signal_both)
 
@@ -339,10 +418,12 @@ class CustomMainWindow(QMainWindow):
         gauche.addWidget(self.signal_og, 0, Qt.AlignHCenter)
         gauche.addWidget(self.signal_og_l)
         gauche.addWidget(self.signal_og_s)
+        gauche.addWidget(self.signal_og_mpl)
         droite = QVBoxLayout()
         droite.addWidget(self.signal_mo, 0, Qt.AlignHCenter)
         droite.addWidget(self.signal_mo_l)
         droite.addWidget(self.signal_mo_s)
+        droite.addWidget(self.signal_mo_mpl)
 
         bloc = QHBoxLayout()
         bloc.addLayout(gauche)
@@ -448,12 +529,12 @@ class CustomMainWindow(QMainWindow):
 
         files, _ = QFileDialog.getOpenFileNames(self, titre, path, types)
         if files:
-            print(f"Selected {len(files)} file{'s' if len(files)>=2 else ''}")
+            if DEBUG: print(f"Selected {len(files)} file{'s' if len(files)>=2 else ''}")
             self.add_files(files)
         return
 
     def handle_dropped_files(self, paths: list[str]) -> None:
-        print(f"Dropped {len(paths)} file{'s' if len(paths)>=2 else ''}")
+        if DEBUG: print(f"Dropped {len(paths)} file{'s' if len(paths)>=2 else ''}")
         self.add_files(paths)
 
     def add_files(self, paths: list[str]) -> None:
@@ -464,7 +545,7 @@ class CustomMainWindow(QMainWindow):
                 if not self.contains_path(path):
                     valid_files.append(path)
             else:
-                print(f"Skipped file: {path}")
+                if DEBUG: print(f"Skipped file: {path}")
 
         if not valid_files:
             return
@@ -477,7 +558,7 @@ class CustomMainWindow(QMainWindow):
 
         self.update_files()
 
-        print(f"+ {len(valid_files)} file{'s' if len(valid_files)>=2 else ''}")
+        if DEBUG: print(f"+ {len(valid_files)} file{'s' if len(valid_files)>=2 else ''}")
         # self.the_status.showMessage("FICHIERS AJOUTÉS...")
         return
 
@@ -491,8 +572,8 @@ class CustomMainWindow(QMainWindow):
             row = self.drop_list.row(item)
             removed_path = item.data(Qt.UserRole) or item.text()
             self.drop_list.takeItem(row)
-            print(f"Removed: {removed_path}")
-            print(f"- 1 file")
+            if DEBUG: print(f"Removed: {removed_path}")
+            if DEBUG: print(f"- 1 file")
 
         # if self.drop_list.count() == 0:
         #
@@ -518,6 +599,7 @@ class CustomMainWindow(QMainWindow):
         # self.pitch_algorithm = placeholder_algorithm
 
         if self.speed_slider.value() != 100:
+            if DEBUG: print("self.speed_slider.value() != 100")
             self.s_output.y = self.speed_algorithm(
                 self.s_output.y,
                 self.s_output.Fs,
@@ -525,24 +607,49 @@ class CustomMainWindow(QMainWindow):
             )
 
         if self.pitch_slider.value() != 100:
+            if DEBUG: print("self.pitch_slider.value() != 100")
             self.s_output.y = self.pitch_algorithm(
                 self.s_output.y,
                 self.s_output.Fs,
                 self.pitch_slider.value()/100
             )
 
-        if self.robot_btn.isChecked():
+        # if self.robot_btn.isChecked():
+        #     self.s_output.y = self.robot_algorithm(
+        #         self.s_output.y,
+        #         self.s_output.Fs,
+        #         150,
+        #     )
+
+        # if self.alien_btn.isChecked():
+        #     self.s_output.y = self.alien_algorithm(
+        #         self.s_output.y,
+        #         self.s_output.Fs,
+        #         80,
+        #     )
+
+        if self.robot_slider.value() != self.robot:
+            if DEBUG: print("self.robot_slider.value() != self.robot")
             self.s_output.y = self.robot_algorithm(
                 self.s_output.y,
                 self.s_output.Fs,
-                150,
+                self.robot_slider.value()
             )
 
-        if self.alien_btn.isChecked():
+        if self.alien_slider.value() != self.alien:
+            if DEBUG: print("self.alien_slider.value() != self.alien")
             self.s_output.y = self.alien_algorithm(
                 self.s_output.y,
                 self.s_output.Fs,
-                80,
+                self.alien_slider.value()
+            )
+
+        if self.moyen_slider.value() != self.moyen:
+            if DEBUG: print("self.moyen_slider.value() != self.moyen")
+            self.s_output.y = self.moyen_algorithm(
+                self.s_output.y,
+                self.s_output.Fs,
+                self.moyen_slider.value()
             )
 
 
@@ -632,4 +739,5 @@ if __name__ == '__main__':
     our_window.add_files(chemin1+f for f in fichiers1)
 
     # Run the main Qt loop
+    DEBUG = True
     sys.exit(app.exec())
