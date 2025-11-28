@@ -522,7 +522,7 @@ class CustomMainWindow(QMainWindow):
     def prompt_for_files(self) -> None:
         titre: str = "CHOISIR DES FICHIERS !!"
         types: str = ""
-        types: str = "Fichiers audio (*.wav *.mp3)"
+        types: str = "Fichiers audio WAV (*.wav)"
         # types: str = "Images (*.jpg *.jpeg *.png *.bmp)"
         path: str = ""
         # path: str = str(Path.home())
@@ -538,10 +538,12 @@ class CustomMainWindow(QMainWindow):
         self.add_files(paths)
 
     def add_files(self, paths: list[str]) -> None:
+        self.audio_extensions = ['.wav', ]
+
         valid_files: list[str] = []
         for candidate in paths:
             path = Path(candidate)
-            if path.is_file():# and path.suffix.lower() in IMAGE_EXTENSIONS:
+            if path.is_file() and path.suffix.lower() in self.audio_extensions:
                 if not self.contains_path(path):
                     valid_files.append(path)
             else:
