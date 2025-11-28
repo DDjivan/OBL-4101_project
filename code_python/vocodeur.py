@@ -155,10 +155,10 @@ def vitesse(e, Fs, k):
 
 def hauteur(e,Fs, k):
 
-    s = pitch_et_tampo(e,Fs,k) #version etirement
+    s = hauteur_et_vitesse(e,Fs,k) #version etirement
     #e = signal.resample(e, n_new) (version zero pading)
 
-    s = tempo_sans_pitch2(s,Fs, 1/k)# On applique l'inverse du facteur pour retrouver la durée d'origine.
+    s = vitesse(s,Fs, 1/k)# On applique l'inverse du facteur pour retrouver la durée d'origine.
 
 
     return s
@@ -169,7 +169,7 @@ def alien(e,Fs, n):
     s = e
     L=[]
     for k in range(-n,n):
-        L.append(pitch_sans_tampo(e,Fs,1+k*0.009))
+        L.append(hauteur(e,Fs,1+k*0.009))
     
     m = len(e)
     for k in range(len(L)):
@@ -228,10 +228,10 @@ if __name__ == '__main__':
         y = y[:, 0]
 
 
-    #y_robot = tempo_sans_pitch2(y,Fs,2)
+    #y_robot = vitesse(y,Fs,2)
 
     y_robot = tempo_sans_pitch(y,Fs,1.5)
-    #y_robot = tempo_sans_pitch2(y,Fs,1.5)
+    #y_robot = vitesse(y,Fs,1.5)
 
     # 3. Sauvegarde
     output_filename = 'audio_robotise.wav'
