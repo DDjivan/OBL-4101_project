@@ -141,7 +141,7 @@ def tempo_sans_pitch2(e, Fs, k):
     
     s_stft = A * np.exp(1j * Phi_s)
     
-    tracer_frequence_isolee(s_stft, 100, Fs, Fen, Pas_s)
+    #tracer_frequence_isolee(s_stft, 100, Fs, Fen, Pas_s)
 
     _, s = signal.istft(s_stft, fs=Fs, nperseg=Fen, noverlap=Fen - Pas_s)
 
@@ -154,7 +154,7 @@ def pitch_sans_tampo(e,Fs, k):
     s = pitch_et_tampo(e,Fs,k) #version etirement
     #e = signal.resample(e, n_new) (version zero pading)
 
-    s = tempo_sans_pitch(s,Fs, 1/k)# On applique l'inverse du facteur pour retrouver la durée d'origine.
+    s = tempo_sans_pitch2(s,Fs, 1/k)# On applique l'inverse du facteur pour retrouver la durée d'origine.
 
 
     return s
@@ -186,12 +186,12 @@ def fantome(e,Fs, i):
     return s
 
 
+
 def alien(e,Fs, i):
     s = e
-    S=0
     L=[]
-    for k in range(-80,80):
-        L.append(pitch_sans_tampo(e,Fs,1+k*0.01))
+    for k in range(-i,i):
+        L.append(pitch_sans_tampo(e,Fs,1+k*0.05))
     
     m = len(e)
     for k in range(len(L)):
@@ -201,10 +201,13 @@ def alien(e,Fs, i):
     print(m)
 
     for k in range(m-10):
-        print(k)
+        S=0.0
         for j in range(len(L)):
             S = S + L[j][k]
-        s[k]=S/(len(L)**2)
+        a=S/len(L)
+        #print(f"{k} ieme valeure {a}")
+        s[k]=a
+
     
     
     #s = s / len(L)
@@ -216,6 +219,20 @@ def alien(e,Fs, i):
 
 
 
+def moyenne(e,Fs, n):
+    s = e
+    for k in range(len(e)):
+        S= 0.0
+        i=0
+        while i<n and i+k<len(e)-1:
+            
+            i=i+1
+            S = S + s[k+i]
+            #print(f"k : {k} | i : {i} | S : {S} ")
+        if S != 0:
+            s[k] = S / i
+    return s
+
 ##----------------------------------------------------------------------------##
 
 ###### Tests
@@ -225,13 +242,13 @@ if __name__ == '__main__':
     fichier2 = 'media/Extrait.wav'
     fichier3 = 'media/Halleluia.wav'
 
-    Fs, y = wavfile.read(fichier3)
+    Fs, y = wavfile.read(fichier2)
 
     if y.ndim > 1:
         y = y[:, 0]
 
 
-    y_robot = alien(y,Fs,1.5)
+    y_robot = alien(y,Fs,2)
 
     # y_robot = tempo_sans_pitch(y,Fs,0.5)
     # y_robot = tempo_sans_pitch2(y,Fs,1.5)
