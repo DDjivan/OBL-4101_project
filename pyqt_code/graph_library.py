@@ -96,7 +96,7 @@ class CustomGraphWindow2(CustomGraphWindowAbstract):
         # wg = widget graph
         wg = self.graph_widget.addPlot(row=0, col=0)
 
-        wg.setTitle(f"`{s1.nom}` et `{s2.nom}`", color='#E49ECB')
+        wg.setTitle(f"`{s1.nom}` (cyan) et `{s2.nom}` (rouge)", color='#E49ECB')
         min_l1 = min(len(s1.t), len(s1.y))
         wg.plot(s1.t[:min_l1], s1.y[:min_l1], pen=pg.mkPen('c', width=0.6))
         min_l2 = min(len(s2.t), len(s2.y))
