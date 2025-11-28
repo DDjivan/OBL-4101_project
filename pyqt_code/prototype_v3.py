@@ -36,6 +36,7 @@ from PySide6.QtCore import QUrl
 
 from .graph_library import CustomGraphWindow1, CustomGraphWindow2
 from .custom_signal import CustomSignalObj
+from .mplgraph_library import show_custom_matplotlib_window
 
 
 
@@ -318,14 +319,26 @@ class CustomMainWindow(QMainWindow):
             lambda: self.play_wav(self.s_input.nom)
             )
         self.signal_og_s = QPushButton("Voir l'original")
-        self.signal_og_s.clicked.connect(self.show_signal_input)
+        self.signal_og_s.clicked.connect(
+            self.show_signal_input
+            )
+        self.signal_og_mpl = QPushButton("Mieux voir l'original")
+        self.signal_og_mpl.clicked.connect(
+            lambda: show_custom_matplotlib_window(self.s_input)
+        )
         self.signal_mo = QLabel("Signal modifié")
         self.signal_mo_l = QPushButton("Écouter le modifié")
         self.signal_mo_l.clicked.connect(
             lambda: self.play_wav(self.s_output.nom)
             )
         self.signal_mo_s = QPushButton("Voir le modifié")
-        self.signal_mo_s.clicked.connect(self.show_signal_output)
+        self.signal_mo_s.clicked.connect(
+            self.show_signal_output
+            )
+        self.signal_mo_mpl = QPushButton("Mieux voir le modifié")
+        self.signal_mo_mpl.clicked.connect(
+            lambda: show_custom_matplotlib_window(self.s_output)
+        )
         self.signal_s = QPushButton("Voir les deux")
         self.signal_s.clicked.connect(self.show_signal_both)
 
@@ -339,10 +352,12 @@ class CustomMainWindow(QMainWindow):
         gauche.addWidget(self.signal_og, 0, Qt.AlignHCenter)
         gauche.addWidget(self.signal_og_l)
         gauche.addWidget(self.signal_og_s)
+        gauche.addWidget(self.signal_og_mpl)
         droite = QVBoxLayout()
         droite.addWidget(self.signal_mo, 0, Qt.AlignHCenter)
         droite.addWidget(self.signal_mo_l)
         droite.addWidget(self.signal_mo_s)
+        droite.addWidget(self.signal_mo_mpl)
 
         bloc = QHBoxLayout()
         bloc.addLayout(gauche)
